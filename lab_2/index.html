@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шотландский Механизм на SVG</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        svg {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <svg id="mechanismSVG" width="800" height="400" xmlns="http://www.w3.org/2000/svg">
+        <line id="crank" x1="0" y1="0" x2="0" y2="0" stroke="blue" stroke-width="5"/>
+        <line id="rod" x1="0" y1="0" x2="0" y2="0" stroke="green" stroke-width="5"/>
+        <rect id="slider" width="20" height="20" fill="red" />
+        <rect id="verticalRect" width="20" height="100" stroke="black" fill="none" stroke-width="2"/>
+        <rect id="beam" width="300" height="10" fill="gray"/>
+    </svg>
+    <script>
+        const svg = document.getElementById('mechanismSVG');
+        const crank = document.getElementById('crank');
+        const rod = document.getElementById('rod');
+        const slider = document.getElementById('slider');
+        const verticalRect = document.getElementById('verticalRect');
+        const beam = document.getElementById('beam');
+
+        const width = parseInt(svg.getAttribute('width'));
+        const height = parseInt(svg.getAttribute('height'));
+        let angle = 0;
+
+        function drawScottishMechanism() {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const crankRadius = 50;
+            const rodLength = 200;
+
+            // Вычисление позиции кривошипа
+            const crankX = centerX + crankRadius * Math.cos(angle);
+            const crankY = centerY + crankRadius * Math.sin(angle);
+
+            // Вычисление позиции ползуна
+            const dx = crankX - centerX;
+            const dy = crankY - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const offsetX = (rodLength * dx) / distance;
+            const sliderX = centerX + offsetX;
+
+            // Обновление позиции и длины кривошипа
+            crank.setAttribute('x1', centerX);
+            crank.setAttribute('y1', centerY);
+            crank.setAttribute('x2', crankX);
+            crank.setAttribute('y2', crankY);
+
+            // Обновление позиции и длины шатуна
+            rod.setAttribute('x1', crankX);
+            rod.setAttribute('y1', crankY);
+            rod.setAttribute('x2', sliderX);
+            rod.setAttribute('y2', centerY);
+
+            // Обновление позиции ползуна (красный квадрат)
+            slider.setAttribute('x', sliderX - 10);
+            slider.setAttribute('y', centerY - 10);
+
+            // Обновление позиции вертикального прямоугольника (прикрепленного к ползуну)
+            verticalRect.setAttribute('x', sliderX - 10);
+            verticalRect.setAttribute('y', centerY - 50);
+
+            // Обновление позиции горизонтальной балки
+            beam.setAttribute('x', sliderX - 150);
+            beam.setAttribute('y', centerY - 5);
+
+            angle += 0.04; // Увеличение скорости
+            if (angle >= 2 * Math.PI) {
+                angle -= 2 * Math.PI;
+            }
+
+            requestAnimationFrame(drawScottishMechanism);
+        }
+
+        drawScottishMechanism();
+    </script>
+</body>
+</html>

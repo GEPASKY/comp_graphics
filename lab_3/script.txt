@@ -1,0 +1,64 @@
+// Инициализация сцены, камеры и рендерера
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Создание кривой для пружины
+const createSpringCurve = (radius, turns, height, pointsPerTurn) => {
+    const points = [];
+    const totalPoints = turns * pointsPerTurn;
+    for (let i = 0; i < totalPoints; i++) {
+        const angle = (i / pointsPerTurn) * 2 * Math.PI;
+        const x = radius * Math.cos(angle);
+        const y = height * (i / totalPoints);
+        const z = radius * Math.sin(angle);
+        points.push(new THREE.Vector3(x, y, z));
+    }
+    return new THREE.CatmullRomCurve3(points);
+};
+
+const radius = 2; // Радиус пружины
+const turns = 10; // Количество витков
+const height = 20; // Высота пружины
+const pointsPerTurn = 20; // Количество точек на один виток
+
+const springCurve = createSpringCurve(radius, turns, height, pointsPerTurn);
+
+// Создание TubeGeometry на основе кривой
+const tubeGeometry = new THREE.TubeGeometry(springCurve, 100, 0.2, 8, false);
+const material = new THREE.MeshPhongMaterial({ color: 0x0077ff, shininess: 100 });
+const springMesh = new THREE.Mesh(tubeGeometry, material);
+
+// Добавление пружины в сцену
+scene.add(springMesh);
+
+// Добавление освещения
+const ambientLight = new THREE.AmbientLight(0x404040); // мягкий белый свет
+scene.add(ambientLight);
+
+const pointLight = new THREE.PointLight(0xffffff, 1);
+pointLight.position.set(10, 10, 10);
+scene.add(pointLight);
+
+// Установка позиции камеры
+camera.position.z = 30;
+
+// Инициализация OrbitControls
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+// Анимация
+const animate = function () {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+};
+animate();
+
+// Обработка изменения размеров окна
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
